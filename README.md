@@ -7,11 +7,20 @@
                               |___/
 ```
 
+
+在此[!版本](https://github.com/donot-wong/dnslog.git)的基础上修改部分.修改使用 mysql数据库.导出 sql 语句.使用时导入根目录下的 dnslog.sql 文件
+
+原版本使用 sqllite.
+
+默认的登录密码是 root/root.可按下面的方法修改.
+
+
 简介
 ---
 
 本版本是对原四叶草 BugscanTeam 打造的监控 DNS 解析记录和 HTTP 访问记录的工具DNSLog的修改版本。遵循GPL2。
 因为原始版本是好几年前开发，一些功能不满足我的需求，因此在源版本基础上进行了重新编码，修改了数据结构、Weblog记录、API等。
+
 
 安装（Docker）
 ---

@@ -29,7 +29,7 @@ SECURE_SSL_REDIRECT = False
 DEBUG = False
 
 # ALLOWED_HOSTS = ['.sqvds.cn']
-ALLOWED_HOSTS = ['.test.com']
+ALLOWED_HOSTS = ['*']
 
 # LOGGING = {
 #     'version': 1,
@@ -136,10 +136,21 @@ WSGI_APPLICATION = 'dnslog.wsgi.application'
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    # }
+
+  # }
+'default': {
+        'ENGINE': 'django.db.backends.mysql',
+       'NAME': 'dnslog',
+        'USER': 'root',
+        'PASSWORD': 't00r',
+        'HOST': 'localhost',
+        'PORT': '3306',
     }
+
 }
 
 
@@ -167,7 +178,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True
 
@@ -182,12 +193,12 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 # DNS_DOMAIN = 'sqvds.cn'
-DNS_DOMAIN = 'test.com'
+DNS_DOMAIN = 'localhost'
 # ADMIN_DOMAIN = 'admin.sqvds.cn'
-ADMIN_DOMAIN = 'admin.test.com'
+ADMIN_DOMAIN = 'localhost'
 
 
-NS1_DOMAIN = 'ns1.donot.me'
-NS2_DOMAIN = 'ns2.donot.me'
+NS1_DOMAIN = 'localhost'
+NS2_DOMAIN = 'localhost'
 
-SERVER_IP = '123.206.98.106'
+SERVER_IP = '127.0.0.1'

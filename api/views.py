@@ -22,11 +22,11 @@ def weblog(request, apikey, hashstr):
 	return JsonResponse(ret)
 
 
-
 def dnslog(request, apikey, hashstr):
 	user = ApiKey.objects.filter(key=apikey)
 	if user:
-		dnslogs = DnsLog.objects.filter(user=user[0].user).filter(host__contains=hashstr)
+		# dnslogs = DnsLog.objects.filter(user=user[0].user).filter(host__contains=hashstr)
+		dnslogs = DnsLog.objects.filter(user=user[0].user).filter(host=hashstr+'.')
 		data = []
 		if dnslogs:
 			for dnslogi in dnslogs:

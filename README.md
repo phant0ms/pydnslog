@@ -7,6 +7,10 @@
                               |___/
 ```
 
+#### 新增redis 缓存。
+
+在settings.py文件里面配置 FAST_开头的变量，命中的记录会存放在redis中而不是mysql。
+
 
 在此[!版本](https://github.com/donot-wong/dnslog.git)的基础上修改部分.修改使用 mysql数据库.导出 sql 语句.使用时导入根目录下的 dnslog.sql 文件
 

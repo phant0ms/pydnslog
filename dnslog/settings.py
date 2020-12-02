@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '=ni)^=sz6jogjy2-lm&v)uxl+k_r3&+iv6alq($4#(&9=v$bx)'
 SECURE_SSL_REDIRECT = False
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 # ALLOWED_HOSTS = ['.sqvds.cn']
 ALLOWED_HOSTS = ['*']
@@ -146,13 +146,23 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
        'NAME': 'dnslog',
         'USER': 'root',
-        'PASSWORD': 't00r',
+        'PASSWORD': '',
         'HOST': 'localhost',
         'PORT': '3306',
     }
 
 }
 
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/0",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
@@ -202,3 +212,18 @@ NS1_DOMAIN = 'localhost'
 NS2_DOMAIN = 'localhost'
 
 SERVER_IP = '127.0.0.1'
+
+
+#=========================================
+# 以下为优化手段, 表api_apikey里面的信息，请匹配使用，不然会出错。
+
+# 匹配的子域名将会把记录存放在redis中
+FAST_SUBDOMAIN = 'sec'
+FAST_USERNAME = 'root'
+FAST_USERID = 1
+# 这个token硬编码， 请对应使用。
+FAST_API_TOKEN = '84dae1f9eea20c10ef70c0f78945d277'
+#=========================================
+
+
+MESSAGE_EXPIRE_TIME = 60*60*1 # 存在redis中的记录过期时间「1天过期」

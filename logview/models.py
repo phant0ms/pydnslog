@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 
 
+
 class WebLog(models.Model):
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
 	ip = models.GenericIPAddressField('remote_addr')
@@ -16,6 +17,7 @@ class WebLog(models.Model):
 class DnsLog(models.Model):
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
 	host = models.TextField('host')
+	ip = models.TextField('ip')
 	type = models.TextField('dns type')
 	log_time = models.DateTimeField('time loged', auto_now_add=True)
 	class Meta:

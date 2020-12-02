@@ -54,6 +54,8 @@
 
                   <th>host</th>
 
+                  <th>ip</th>>
+
                   <th>type</th>
 
                   <th>date</th>
@@ -72,9 +74,11 @@
 
                 <td>{{ dnslog.host }}</td>
 
+                <td>{{ dnslog.ip }}</td>
+
                 <td>{{ dnslog.type }}</td>
 
-                <td>{{ dnslog.log_time|date:'Y-m-d H:i:s' }}</td>
+                <td>{{ dnslog.log_time}}
 
                 </tr>
 

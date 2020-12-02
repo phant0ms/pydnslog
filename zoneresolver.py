@@ -6,12 +6,22 @@ import django
 django.setup()
 import copy
 import re
+import time
 import tempfile
 from dnslib import RR, QTYPE, RCODE, TXT
 from dnslib.server import DNSServer, DNSHandler, BaseResolver, DNSLogger
 from logview.models import *
 from dnslog import settings
+# from django.core.cache import cache
+from django_redis import get_redis_connection
+from dnslog.settings import MESSAGE_EXPIRE_TIME
+from dnslog.settings import FAST_SUBDOMAIN, FAST_USERID
 # import logging
+import pickle
+
+G_ID = 0 #全局的一个id，每次重启初始化
+
+cache = get_redis_connection('default')
 
 class MysqlLogger():
     # default_logger = logging.getLogger("django")
@@ -34,19 +44,40 @@ class MysqlLogger():
         pass
 
     def log_request(self, handler, request):
+
+
         domain = request.q.qname.__str__().lower()
         # self.default_logger.info(domain)
         if domain.endswith(settings.DNS_DOMAIN + '.'):
             udomain = re.search(r'\.?([^\.]+)\.%s\.' % settings.DNS_DOMAIN,
                                 domain)
             if udomain:
-                user = UserSubDomain.objects.filter(subdomain__iexact=udomain.group(1))
-                if not user and domain.strip(".") != settings.ADMIN_DOMAIN:
-                    user = UserSubDomain.objects.filter(subdomain__exact='@')
-                if user:
-                    dnslog = DnsLog(
-                        user=user[0].user, host=domain, type=QTYPE[request.q.qtype])
-                    dnslog.save()
+                if udomain.group(1) == FAST_SUBDOMAIN: #存到redis
+                    # userid = FAST_USERID
+                    client_ip = handler.client_address[0]
+                    current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+                    global G_ID
+                    G_ID +=1
+                    dnslog = DnsLog(id = G_ID,
+                         host=domain, ip=client_ip, type=QTYPE[request.q.qtype],
+                    log_time = current_time)
+                    print(dnslog.log_time)
+                    # dnslog.save()
+                    key = f'{domain}_{time.time()}'
+                    cache.setex(key, MESSAGE_EXPIRE_TIME, pickle.dumps(dnslog))
+                    # cache.get(domain)
+                    # print(cache.get(domain))
+                else:
+                    user = UserSubDomain.objects.filter(subdomain__iexact=udomain.group(1))
+                    if not user and domain.strip(".") != settings.ADMIN_DOMAIN:
+                        user = UserSubDomain.objects.filter(subdomain__exact='@')
+                    if user:
+                        client_ip = handler.client_address[0]
+                        current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+                        dnslog = DnsLog(
+                            user=user[0].user, host=domain,ip=client_ip, type=QTYPE[request.q.qtype],
+                            )
+                        dnslog.save()
 
     def log_send(self, handler, data):
         pass

@@ -12,6 +12,11 @@ import random
 import string
 from api.models import *
 from .models import *
+from dnslog.settings import FAST_USERNAME, FAST_API_TOKEN
+from django_redis import get_redis_connection
+import pickle
+
+cache = get_redis_connection('default')
 
 # default_logger = logging.getLogger("django")
 
@@ -96,28 +101,54 @@ def selfinfo(request):
 @login_required(login_url='/logview/login')
 def dnslog(request):
 	user = request.user
-	vardict = {}
 	dnspage = getpage(request.GET.get("dnspage", 1))
-	paginator = Paginator(DnsLog.objects.filter(user=user), 10)
-	try:
-		dnslogs = paginator.page(dnspage)
-	except(EmptyPage, InvalidPage, PageNotAnInteger):
-		dnspage = paginator.num_pages
-		dnslogs = paginator.page(paginator.num_pages)
-	vardict['type'] = 'dns'
-	vardict['dnspage'] = dnspage
-	vardict['pagerange'] = paginator.page_range
-	vardict['dnslogs'] = dnslogs
-	vardict['numpages'] = paginator.num_pages
+	if user.username == FAST_USERNAME: # 去redis里面查询
+		vardict = {}
+		paginator = Paginator([pickle.loads(cache.get(x)) for x in cache.keys('*')],20)
+		try:
+			dnslogs = paginator.page(dnspage)
+		except(EmptyPage, InvalidPage, PageNotAnInteger):
+			dnspage = paginator.num_pages
+			dnslogs = paginator.page(paginator.num_pages)
+		vardict['type'] = 'dns'
+		vardict['dnspage'] = dnspage
+		vardict['pagerange'] = paginator.page_range
+		vardict['dnslogs'] = dnslogs
+		vardict['numpages'] = paginator.num_pages
 
-	usersubdomain = UserSubDomain.objects.filter(user=user)[0].subdomain
-	vardict['userdomain'] = usersubdomain + '.' + settings.DNS_DOMAIN
+		usersubdomain = UserSubDomain.objects.filter(user=user)[0].subdomain
+		vardict['userdomain'] = usersubdomain + '.' + settings.DNS_DOMAIN
 
-	vardict['udomain'] = str(usersubdomain)
-	vardict['admindomain'] = str(settings.ADMIN_DOMAIN)
-	vardict['apikey'] = ApiKey.objects.filter(user=user)[0].key
+		vardict['udomain'] = str(usersubdomain)
+		vardict['admindomain'] = str(settings.ADMIN_DOMAIN)
+		# vardict['apikey'] = ApiKey.objects.filter(user=user)[0].key
+		vardict['apikey'] = FAST_API_TOKEN
 
-	return render(request, 'logview/views.html', vardict)
+		return render(request, 'logview/views.html', vardict)
+
+	else:
+		vardict = {}
+
+		paginator = Paginator(DnsLog.objects.filter(user=user), 10)
+		try:
+			dnslogs = paginator.page(dnspage)
+		except(EmptyPage, InvalidPage, PageNotAnInteger):
+			dnspage = paginator.num_pages
+			dnslogs = paginator.page(paginator.num_pages)
+		vardict['type'] = 'dns'
+		vardict['dnspage'] = dnspage
+		vardict['pagerange'] = paginator.page_range
+		vardict['dnslogs'] = dnslogs
+		vardict['numpages'] = paginator.num_pages
+
+		usersubdomain = UserSubDomain.objects.filter(user=user)[0].subdomain
+		vardict['userdomain'] = usersubdomain + '.' + settings.DNS_DOMAIN
+
+		vardict['udomain'] = str(usersubdomain)
+		vardict['admindomain'] = str(settings.ADMIN_DOMAIN)
+		vardict['apikey'] = ApiKey.objects.filter(user=user)[0].key
+
+		return render(request, 'logview/views.html', vardict)
 
 
 
@@ -170,8 +201,12 @@ def genapikey():
 @login_required(login_url='/logview/login')
 def clear(request, type):
 	user = request.user
+
 	if type == 'dnslog':
-		DnsLog.objects.filter(user=user).delete()
+		if user.username == FAST_USERNAME:
+			cache.flushdb()
+		else:
+			DnsLog.objects.filter(user=user).delete()
 		return HttpResponseRedirect('/logview/dnslog')
 	elif type == 'weblog':
 		WebLog.objects.filter(user=user).delete()

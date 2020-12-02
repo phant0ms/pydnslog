@@ -261,14 +261,15 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `logview_dnslog`;
 CREATE TABLE `logview_dnslog` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `host` text NOT NULL,
-  `type` text NOT NULL,
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `host` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `ip` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `log_time` datetime NOT NULL,
-  `user_id` int(11) NOT NULL,
+  `user_id` int NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `host_index` (`host`(255)) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  KEY `host_index` (`host`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=135 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- ----------------------------
 -- Records of logview_dnslog
